@@ -53,6 +53,12 @@ prop_transform_works s = transform s == concatMap ($s) [drop (halflen s)
 prop_insertAt_1_same_as_prepend s = insertAt s "abcde" 1 == s:"abcde"
     where _ = s :: Char
 
+prop_range'_idempotent x y = x > 0 && x < y ==> range' x y == range' x y
+    where _ = (x :: Int, y :: Int)
+
+prop_range'_works x y = x > 0 && x < y ==> range' x y == [x..y]
+    where _ = (x :: Int, y :: Int)
+
 tests = [("prop_last'", quickCheck prop_last'_head_drop_len)
   , ("prop_elemBeforeLast", quickCheck prop_elemBeforeLast_acc)
   , ("prop_len_acc", quickCheck prop_len'_acc)
@@ -68,4 +74,6 @@ tests = [("prop_last'", quickCheck prop_last'_head_drop_len)
   , ("prop_transform_idemp", quickCheck prop_transform_idemp)
   , ("prop_transform_works", quickCheck prop_transform_works)
   , ("prop_insertAt_1_same_as_prepend", quickCheck prop_insertAt_1_same_as_prepend)
+  , ("prop_range'_idempotent", quickCheck prop_range'_idempotent)
+  , ("prop_range'_works", quickCheck prop_range'_works)
   ]

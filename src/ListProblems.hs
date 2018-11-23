@@ -4,6 +4,7 @@ module ListProblems
   , packCons, rle, rleDecode, dup, dupN
   , dropEvery, splitOn, mapTuple, slice
   , rotate, dropAt, transform, insertAt
+  , range'
   ) where
 
 import Control.Exception
@@ -169,10 +170,25 @@ transform xs = rotate (h xs) xs
 insertAt :: a -> [a] -> Int -> [a]
 insertAt x [] _   = [x]
 insertAt x xs 1   = x:xs
-insertAt x xs n   = first ++ x:second
+insertAt x xs n
+  |   n > length xs
+  ||  n <= 0         = error "Invalid insertAt, index is out of list bounds"
+  | otherwise        = first ++ x:second
       where
         (first, second) = ((,) <$> take n <*> drop n) xs
 
+
+{-|
+    Problem 22: create a list of ints in a given range
+    (inclusive, i.e.: range' 1 3 === [1, 2, 3])
+|-}
+
+range' :: Int -> Int -> [Int]
+range' x y 
+  | x > y     = error "Impossible range detected"
+  | x < y     = x:range' (x + 1) y
+  | x == y    = [y]
+  
 --------------------------------------------------------------
 -- Error code
 --------------------------------------------------------------
