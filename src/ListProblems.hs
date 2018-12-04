@@ -4,11 +4,16 @@ module ListProblems
   , packCons, rle, rleDecode, dup, dupN
   , dropEvery, splitOn, mapTuple, slice
   , rotate, dropAt, transform, insertAt
-  , range'
+  , range', selectRandomN, lotto, randPerm
+  , combinations
   ) where
 
 import Control.Exception
 import Data.Typeable
+import Numeric
+import Data.List
+import Data.Unique
+import System.Random
 
 -- Problem 1: Find the last element of a list
 
@@ -189,6 +194,54 @@ range' x y
   | x < y     = x:range' (x + 1) y
   | x == y    = [y]
   
+{-|
+    Problem 23: Extract n random elements from list
+|-}
+-- select a random element and return a tuple with (element, rest)
+randElem :: [a] -> IO (a, [a])
+randElem xs = do
+  r <- randomRIO (0, (length xs) - 1)
+  let rest = take r xs ++ drop (r + 1) xs
+  return (xs !! r, rest)
+
+-- recursively select a random element until n is 0
+selectRandomN :: Int -> [a] -> IO [a]
+selectRandomN n xs
+  | n < 0           = error "N must be positive"
+  | n > length xs   = error "N is greater than list length"
+  | n == 0          = return []
+  | otherwise       = do
+      (rand, rem) <- randElem xs
+      rest <- selectRandomN (n - 1) rem
+      return $ rand:rest
+
+{-|
+    Problem 24: Select N random numbers from 1..M
+|-}
+
+lotto :: Int -> Int -> IO [Int]
+lotto n m = selectRandomN n [1..m]
+
+{-|
+    Problem 25: generate a random permutation of a list
+|-}
+
+randPerm :: [a] -> IO [a]
+randPerm xs = do
+  (p, _) <- randElem . permutations $ xs
+  return p
+
+{-|
+    Problem 26: Generate all possible combinations
+    of K elements from a list
+|-}
+-- cons x to all the outputs of `combinations (n-1) xs`,
+-- then concat it with the output of `combinations n xs`
+combinations :: Int -> [a] -> [[a]]
+combinations 0 _      = [[]]
+combinations _ []     = []
+combinations n (x:xs) = map (x:) $ combinations (n-1) xs ++ combinations n xs
+
 --------------------------------------------------------------
 -- Error code
 --------------------------------------------------------------
