@@ -4,12 +4,24 @@ import Text.Printf
 import Test.QuickCheck
 import Test.QuickCheck.Arbitrary
 import ListProblems
+import MathProblems
 import Data.Char
+
+-- Arbitrary prime generator
+newtype Prime = Prime Int deriving Show
+
+primes = sieve [2..]
+    where
+      sieve (p:xs) = Prime p : sieve [x | x <- xs, x `mod` p > 0]
+
+instance Arbitrary Prime where
+    arbitrary = do i <- arbitrary
+                   return $ primes!!abs i
 
 main :: IO ()
 main  = mapM_ (\(s,a) -> printf "%-25s: " s >> a) tests
 
-prop_last'_head_drop_len s = not (null s) ==> (head $ drop (length s - 1) s) == last' s
+prop_last'_head_drop_len s = not (null s) ==> head (drop (length s - 1) s) == last' s
   where _ = s :: [Int]
 
 prop_elemBeforeLast_acc s = not (null s || length s == 1) ==> s!!(length s - 2) == elemBeforeLast s
@@ -47,7 +59,7 @@ prop_transform_idemp s = t == t
 prop_transform_works s = transform s == concatMap ($s) [drop (halflen s)
                                                       , take (halflen s)]
   where 
-    _       = s :: [Char]
+    _       = s :: String
     halflen = flip quot 2 . length
 
 prop_insertAt_1_same_as_prepend s = insertAt s "abcde" 1 == s:"abcde"
@@ -58,6 +70,8 @@ prop_range'_idempotent x y = x > 0 && x < y ==> range' x y == range' x y
 
 prop_range'_works x y = x > 0 && x < y ==> range' x y == [x..y]
     where _ = (x :: Int, y :: Int)
+
+prop_isPrime_works (Prime n) = isPrime n
 
 tests = [("prop_last'", quickCheck prop_last'_head_drop_len)
   , ("prop_elemBeforeLast", quickCheck prop_elemBeforeLast_acc)
@@ -76,4 +90,5 @@ tests = [("prop_last'", quickCheck prop_last'_head_drop_len)
   , ("prop_insertAt_1_same_as_prepend", quickCheck prop_insertAt_1_same_as_prepend)
   , ("prop_range'_idempotent", quickCheck prop_range'_idempotent)
   , ("prop_range'_works", quickCheck prop_range'_works)
+  , ("prop_isPrime_works", quickCheckWith (stdArgs {maxSuccess=10000}) prop_isPrime_works)
   ]
