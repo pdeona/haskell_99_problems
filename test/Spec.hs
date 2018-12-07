@@ -73,6 +73,12 @@ prop_range'_works x y = x > 0 && x < y ==> range' x y == [x..y]
 
 prop_isPrime_works (Prime n) = isPrime n
 
+prop_primeFactors_equals_n n = n > 0 ==> product (primeFactors n) == n
+    where _ = n :: Int
+
+prop_phiImproved_equals_totient n = n > 0 ==> totientPhi n == phiImproved n
+    where _ = n :: Int
+
 tests = [("prop_last'", quickCheck prop_last'_head_drop_len)
   , ("prop_elemBeforeLast", quickCheck prop_elemBeforeLast_acc)
   , ("prop_len_acc", quickCheck prop_len'_acc)
@@ -90,5 +96,7 @@ tests = [("prop_last'", quickCheck prop_last'_head_drop_len)
   , ("prop_insertAt_1_same_as_prepend", quickCheck prop_insertAt_1_same_as_prepend)
   , ("prop_range'_idempotent", quickCheck prop_range'_idempotent)
   , ("prop_range'_works", quickCheck prop_range'_works)
-  , ("prop_isPrime_works", quickCheckWith (stdArgs {maxSuccess=10000}) prop_isPrime_works)
+  , ("prop_isPrime_works", quickCheck prop_isPrime_works)
+  , ("prop_primeFactors_equals_n", quickCheck prop_primeFactors_equals_n)
+  , ("prop_phiImproved_equals_totient", quickCheck prop_phiImproved_equals_totient)
   ]

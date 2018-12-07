@@ -1,8 +1,11 @@
 module MathProblems
   ( isPrime, gcd', coprime, totientPhi
-  , primeFactors
-
+  , primeFactors, primeFactorsMult
+  , phiImproved
   ) where
+
+import ListProblems
+import qualified Data.Foldable as F
 
 isPrime :: Int -> Bool
 isPrime n
@@ -25,7 +28,21 @@ totientPhi :: Int -> Int
 totientPhi n = length [m | m <- [1..n], coprime n m]
 
 primeFactors :: Int -> [Int]
+-- prime factorization of an integer
+primeFactors 0 = []
 primeFactors 1 = []
 primeFactors m =
   let prime = head $ dropWhile ((/= 0) . mod m) [2..m]
     in (prime:) $ primeFactors $ div m prime
+
+primeFactorsMult :: Int -> [(Int, Int)]
+-- prime factorization of int, encoded into (Prime n, frequency)
+primeFactorsMult = map flipTuple <$> rle . primeFactors
+  where
+    flipTuple (x, y) = (y, x)
+
+phiImproved :: Int -> Int
+phiImproved = F.product . map (phi' . mapTuple fromIntegral) <$> primeFactorsMult
+    where
+      phi' :: (Int, Int) -> Int
+      phi' (x, f) = (x - 1) * (x ^ (f - 1))

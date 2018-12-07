@@ -78,7 +78,6 @@ packCons (x:xs) = (x:(takeWhile (== x) xs)) : (packCons $ dropWhile (== x) xs)
 rle :: (Eq a) => [a] -> [(Int, a)]
 rle = map ((,) <$> length <*> head) . packCons
 
-
 -- Problem 11: RLE, single elements placed directly in list, no tuple
 data ListItem a = Multiple Int a | Single a
   deriving (Show)
